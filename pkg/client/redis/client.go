@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/go-logr/logr"
 	rediscli "github.com/go-redis/redis"
 
 	"github.com/ucloud/redis-operator/pkg/util"
@@ -30,11 +31,12 @@ type Client interface {
 }
 
 type client struct {
+	log          logr.Logger
 }
 
 // New returns a redis client
-func New() Client {
-	return &client{}
+func New(log logr.Logger) Client {
+	return &client{log.WithName("redis-utils")}
 }
 
 const (
@@ -104,7 +106,13 @@ func (c *client) GetNumberSentinelSlavesInMemory(ip string, auth *util.AuthConfi
 	}
 	nSlaves := len(slaveInfoBlobs)
 	for _, slaveInfoBlob := range slaveInfoBlobs {
+
+		c.log.V(5).Info("slaveInfo from sentinel " + ip, "slaveInfo", slaveInfoBlob)
+
 		slavePriority := slaveInfoFieldByName("slave-priority", slaveInfoBlob)
+
+		c.log.V(5).Info("slavePriority from sentinel " + ip, "slavePriority", slavePriority)
+
 		if slavePriority == "0" {
 			nSlaves -= 1
 		}
