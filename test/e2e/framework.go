@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/onsi/gomega"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -70,7 +70,7 @@ func (f *Framework) BeforeEach() {
 
 	f.Client = client
 	f.UtilClient = cli
-	f.RedisClient = redis.New()
+	f.RedisClient = redis.New(log)
 	f.K8sService = k8s.New(cli, log)
 
 	err = f.createTestNamespace()

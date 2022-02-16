@@ -1,4 +1,4 @@
-package rediscluster_test
+package rediscluster
 
 import (
 	"testing"

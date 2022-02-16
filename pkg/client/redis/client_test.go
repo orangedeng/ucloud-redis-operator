@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/go-logr/logr"
 	rediscli "github.com/go-redis/redis"
 )
 
@@ -18,7 +19,7 @@ func newClient() *rediscli.Client {
 func TestGetAllRedisConfig(t *testing.T) {
 	cli := newClient()
 	//var client redis.Client
-	client := New()
+	client := New(logr.New(nil))
 	result, err := client.GetAllRedisConfig(cli)
 	if err != nil {
 		t.Fatal(err)
