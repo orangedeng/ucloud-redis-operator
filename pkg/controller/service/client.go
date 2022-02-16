@@ -11,6 +11,7 @@ import (
 	redisv1beta1 "github.com/ucloud/redis-operator/pkg/apis/redis/v1beta1"
 	"github.com/ucloud/redis-operator/pkg/client/k8s"
 	"github.com/ucloud/redis-operator/pkg/util"
+	utilold "github.com/ucloud/redis-operator/pkg/util-old"
 )
 
 // RedisClusterClient has the minimumm methods that a Redis cluster controller needs to satisfy
@@ -44,7 +45,7 @@ func NewRedisClusterKubeClient(k8sService k8s.Services, logger logr.Logger) *Red
 
 func generateSelectorLabels(component, name string) map[string]string {
 	return map[string]string{
-		"app.kubernetes.io/part-of":   util.AppLabel,
+		"app.kubernetes.io/part-of":   utilold.AppLabel,
 		"app.kubernetes.io/component": component,
 		"app.kubernetes.io/name":      name,
 	}
@@ -76,11 +77,11 @@ func (r *RedisClusterKubeClient) EnsureSentinelProbeConfigMap(rc *redisv1beta1.R
 
 // EnsureSentinelStatefulset makes sure the sentinel deployment exists in the desired state
 func (r *RedisClusterKubeClient) EnsureSentinelStatefulset(rc *redisv1beta1.RedisCluster, labels map[string]string, ownerRefs []metav1.OwnerReference) error {
-	if err := r.ensurePodDisruptionBudget(rc, util.SentinelName, util.SentinelRoleName, labels, ownerRefs); err != nil {
+	if err := r.ensurePodDisruptionBudget(rc, utilold.SentinelName, utilold.SentinelRoleName, labels, ownerRefs); err != nil {
 		return err
 	}
 
-	oldSs, err := r.K8SService.GetStatefulSet(rc.Namespace, util.GetSentinelName(rc))
+	oldSs, err := r.K8SService.GetStatefulSet(rc.Namespace, utilold.GetSentinelName(rc))
 	if err != nil {
 		// If no resource we need to create.
 		if errors.IsNotFound(err) {
@@ -99,11 +100,11 @@ func (r *RedisClusterKubeClient) EnsureSentinelStatefulset(rc *redisv1beta1.Redi
 
 // EnsureRedisStatefulset makes sure the redis statefulset exists in the desired state
 func (r *RedisClusterKubeClient) EnsureRedisStatefulset(rc *redisv1beta1.RedisCluster, labels map[string]string, ownerRefs []metav1.OwnerReference) error {
-	if err := r.ensurePodDisruptionBudget(rc, util.RedisName, util.RedisRoleName, labels, ownerRefs); err != nil {
+	if err := r.ensurePodDisruptionBudget(rc, utilold.RedisName, utilold.RedisRoleName, labels, ownerRefs); err != nil {
 		return err
 	}
 
-	oldSs, err := r.K8SService.GetStatefulSet(rc.Namespace, util.GetRedisName(rc))
+	oldSs, err := r.K8SService.GetStatefulSet(rc.Namespace, utilold.GetRedisName(rc))
 	if err != nil {
 		// If no resource we need to create.
 		if errors.IsNotFound(err) {
@@ -186,7 +187,7 @@ func (r *RedisClusterKubeClient) EnsureRedisService(rc *redisv1beta1.RedisCluste
 
 // EnsureNotPresentRedisService makes sure the redis service is not present
 func (r *RedisClusterKubeClient) EnsureNotPresentRedisService(rc *redisv1beta1.RedisCluster) error {
-	name := util.GetRedisName(rc)
+	name := utilold.GetRedisName(rc)
 	namespace := rc.Namespace
 	// If the service exists (no get error), delete it
 	if _, err := r.K8SService.GetService(namespace, name); err == nil {
@@ -197,7 +198,7 @@ func (r *RedisClusterKubeClient) EnsureNotPresentRedisService(rc *redisv1beta1.R
 
 // EnsureRedisStatefulset makes sure the pdb exists in the desired state
 func (r *RedisClusterKubeClient) ensurePodDisruptionBudget(rc *redisv1beta1.RedisCluster, name string, component string, labels map[string]string, ownerRefs []metav1.OwnerReference) error {
-	name = util.GenerateName(name, rc.Name)
+	name = utilold.GenerateName(name, rc.Name)
 	namespace := rc.Namespace
 
 	minAvailable := intstr.FromInt(2)

@@ -12,6 +12,7 @@ import (
 	"github.com/ucloud/redis-operator/pkg/client/k8s"
 	"github.com/ucloud/redis-operator/pkg/client/redis"
 	"github.com/ucloud/redis-operator/pkg/util"
+	utilold "github.com/ucloud/redis-operator/pkg/util-old"
 )
 
 // RedisClusterHeal defines the intercace able to fix the problems on the redis clusters
@@ -47,7 +48,7 @@ func (r *RedisClusterHealer) MakeMaster(ip string, auth *util.AuthConfig) error 
 
 // SetOldestAsMaster puts all redis to the same master, choosen by order of appearance
 func (r *RedisClusterHealer) SetOldestAsMaster(rc *redisv1beta1.RedisCluster, auth *util.AuthConfig) error {
-	ssp, err := r.k8sService.GetStatefulSetPods(rc.Namespace, util.GetRedisName(rc))
+	ssp, err := r.k8sService.GetStatefulSetPods(rc.Namespace, utilold.GetRedisName(rc))
 	if err != nil {
 		return err
 	}
@@ -80,7 +81,7 @@ func (r *RedisClusterHealer) SetOldestAsMaster(rc *redisv1beta1.RedisCluster, au
 
 // SetMasterOnAll puts all redis nodes as a slave of a given master
 func (r *RedisClusterHealer) SetMasterOnAll(masterIP string, rc *redisv1beta1.RedisCluster, auth *util.AuthConfig) error {
-	ssp, err := r.k8sService.GetStatefulSetPods(rc.Namespace, util.GetRedisName(rc))
+	ssp, err := r.k8sService.GetStatefulSetPods(rc.Namespace, utilold.GetRedisName(rc))
 	if err != nil {
 		return err
 	}

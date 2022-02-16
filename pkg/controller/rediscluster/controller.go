@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -67,7 +67,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	k8sService := k8s.New(mgr.GetClient(), log)
 
 	// Create the redis clients
-	redisClient := redis.New()
+	redisClient := redis.New(log)
 
 	// Create internal services.
 	rcService := service.NewRedisClusterKubeClient(k8sService, log)

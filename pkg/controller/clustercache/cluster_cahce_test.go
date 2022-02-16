@@ -1,10 +1,12 @@
 package clustercache
 
 import (
-	"github.com/stretchr/testify/assert"
+	"sync"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/stretchr/testify/assert"
+
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	redisv1beta1 "github.com/ucloud/redis-operator/pkg/apis/redis/v1beta1"
 )
@@ -51,7 +53,9 @@ func TestCache(t *testing.T) {
 		},
 	}
 
-	meta := make(MetaMap)
+	meta := MetaMap{
+		Map: sync.Map{},
+	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			rcMeta1 := meta.Cache(test.rc1)
@@ -112,7 +116,9 @@ func TestCachePasswd(t *testing.T) {
 		},
 	}
 
-	meta := make(MetaMap)
+	meta := MetaMap{
+		Map: sync.Map{},
+	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			rcMeta1 := meta.Cache(test.rc1)

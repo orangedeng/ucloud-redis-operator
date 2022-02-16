@@ -13,6 +13,7 @@ import (
 
 	redisv1beta1 "github.com/ucloud/redis-operator/pkg/apis/redis/v1beta1"
 	"github.com/ucloud/redis-operator/pkg/util"
+	utilold "github.com/ucloud/redis-operator/pkg/util-old"
 )
 
 const (
@@ -23,11 +24,11 @@ const (
 )
 
 func generateSentinelService(rc *redisv1beta1.RedisCluster, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.Service {
-	name := util.GetSentinelName(rc)
+	name := utilold.GetSentinelName(rc)
 	namespace := rc.Namespace
 
 	sentinelTargetPort := intstr.FromInt(26379)
-	labels = util.MergeLabels(labels, generateSelectorLabels(util.SentinelRoleName, rc.Name))
+	labels = util.MergeLabels(labels, generateSelectorLabels(utilold.SentinelRoleName, rc.Name))
 
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -51,10 +52,10 @@ func generateSentinelService(rc *redisv1beta1.RedisCluster, labels map[string]st
 }
 
 func generateRedisService(rc *redisv1beta1.RedisCluster, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.Service {
-	name := util.GetRedisName(rc)
+	name := utilold.GetRedisName(rc)
 	namespace := rc.Namespace
 
-	labels = util.MergeLabels(labels, generateSelectorLabels(util.RedisRoleName, rc.Name))
+	labels = util.MergeLabels(labels, generateSelectorLabels(utilold.RedisRoleName, rc.Name))
 	redisTargetPort := intstr.FromInt(6379)
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -80,10 +81,10 @@ func generateRedisService(rc *redisv1beta1.RedisCluster, labels map[string]strin
 }
 
 func generateSentinelConfigMap(rc *redisv1beta1.RedisCluster, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.ConfigMap {
-	name := util.GetSentinelName(rc)
+	name := utilold.GetSentinelName(rc)
 	namespace := rc.Namespace
 
-	labels = util.MergeLabels(labels, generateSelectorLabels(util.SentinelRoleName, rc.Name))
+	labels = util.MergeLabels(labels, generateSelectorLabels(utilold.SentinelRoleName, rc.Name))
 	sentinelConfigFileContent := `sentinel monitor mymaster 127.0.0.1 6379 2
 sentinel down-after-milliseconds mymaster 1000
 sentinel failover-timeout mymaster 3000
@@ -101,16 +102,16 @@ sentinel parallel-syncs mymaster 2`
 			OwnerReferences: ownerRefs,
 		},
 		Data: map[string]string{
-			util.SentinelConfigFileName: sentinelConfigFileContent,
+			utilold.SentinelConfigFileName: sentinelConfigFileContent,
 		},
 	}
 }
 
 func generateRedisConfigMap(rc *redisv1beta1.RedisCluster, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.ConfigMap {
-	name := util.GetRedisName(rc)
+	name := utilold.GetRedisName(rc)
 	namespace := rc.Namespace
 
-	labels = util.MergeLabels(labels, generateSelectorLabels(util.RedisRoleName, rc.Name))
+	labels = util.MergeLabels(labels, generateSelectorLabels(utilold.RedisRoleName, rc.Name))
 	redisConfigFileContent := `slaveof 127.0.0.1 6379
 tcp-keepalive 60
 save 900 1
@@ -127,16 +128,16 @@ save 300 10`
 			OwnerReferences: ownerRefs,
 		},
 		Data: map[string]string{
-			util.RedisConfigFileName: redisConfigFileContent,
+			utilold.RedisConfigFileName: redisConfigFileContent,
 		},
 	}
 }
 
 func generateRedisShutdownConfigMap(rc *redisv1beta1.RedisCluster, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.ConfigMap {
-	name := util.GetRedisShutdownConfigMapName(rc)
+	name := utilold.GetRedisShutdownConfigMapName(rc)
 	namespace := rc.Namespace
 
-	labels = util.MergeLabels(labels, generateSelectorLabels(util.RedisRoleName, rc.Name))
+	labels = util.MergeLabels(labels, generateSelectorLabels(utilold.RedisRoleName, rc.Name))
 	envSentinelHost := fmt.Sprintf("REDIS_SENTINEL_%s_SERVICE_HOST", strings.ToUpper(rc.Name))
 	envSentinelPort := fmt.Sprintf("REDIS_SENTINEL_%s_SERVICE_PORT_SENTINEL", strings.ToUpper(rc.Name))
 	shutdownContent := fmt.Sprintf(`#!/usr/bin/env sh
@@ -171,10 +172,10 @@ fi`, envSentinelHost, envSentinelPort, envSentinelHost, envSentinelPort)
 }
 
 func generateSentinelReadinessProbeConfigMap(rc *redisv1beta1.RedisCluster, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.ConfigMap {
-	name := util.GetSentinelReadinessCm(rc)
+	name := utilold.GetSentinelReadinessCm(rc)
 	namespace := rc.Namespace
 
-	labels = util.MergeLabels(labels, generateSelectorLabels(util.RedisRoleName, rc.Name))
+	labels = util.MergeLabels(labels, generateSelectorLabels(utilold.RedisRoleName, rc.Name))
 	checkContent := `#!/usr/bin/env sh
 set -eou pipefail
 redis-cli -h $(hostname) -p 26379 ping
@@ -203,12 +204,12 @@ fi
 
 func generateRedisStatefulSet(rc *redisv1beta1.RedisCluster, labels map[string]string,
 	ownerRefs []metav1.OwnerReference) *appsv1.StatefulSet {
-	name := util.GetRedisName(rc)
+	name := utilold.GetRedisName(rc)
 	namespace := rc.Namespace
 
 	spec := rc.Spec
 	redisCommand := getRedisCommand(rc)
-	labels = util.MergeLabels(labels, generateSelectorLabels(util.RedisRoleName, rc.Name))
+	labels = util.MergeLabels(labels, generateSelectorLabels(utilold.RedisRoleName, rc.Name))
 	volumeMounts := getRedisVolumeMounts(rc)
 	volumes := getRedisVolumes(rc)
 
@@ -321,13 +322,13 @@ func generateRedisStatefulSet(rc *redisv1beta1.RedisCluster, labels map[string]s
 }
 
 func generateSentinelStatefulSet(rc *redisv1beta1.RedisCluster, labels map[string]string, ownerRefs []metav1.OwnerReference) *appsv1.StatefulSet {
-	name := util.GetSentinelName(rc)
-	configMapName := util.GetSentinelName(rc)
+	name := utilold.GetSentinelName(rc)
+	configMapName := utilold.GetSentinelName(rc)
 	namespace := rc.Namespace
 
 	spec := rc.Spec
 	sentinelCommand := getSentinelCommand(rc)
-	labels = util.MergeLabels(labels, generateSelectorLabels(util.SentinelRoleName, rc.Name))
+	labels = util.MergeLabels(labels, generateSelectorLabels(utilold.SentinelRoleName, rc.Name))
 
 	return &appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
@@ -337,7 +338,7 @@ func generateSentinelStatefulSet(rc *redisv1beta1.RedisCluster, labels map[strin
 			OwnerReferences: ownerRefs,
 		},
 		Spec: appsv1.StatefulSetSpec{
-			ServiceName: util.GetSentinelHeadlessSvc(rc),
+			ServiceName: utilold.GetSentinelHeadlessSvc(rc),
 			Replicas:    &spec.Sentinel.Replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels,
@@ -370,8 +371,8 @@ func generateSentinelStatefulSet(rc *redisv1beta1.RedisCluster, labels map[strin
 							},
 							Command: []string{
 								"cp",
-								fmt.Sprintf("/redis/%s", util.SentinelConfigFileName),
-								fmt.Sprintf("/redis-writable/%s", util.SentinelConfigFileName),
+								fmt.Sprintf("/redis/%s", utilold.SentinelConfigFileName),
+								fmt.Sprintf("/redis-writable/%s", utilold.SentinelConfigFileName),
 							},
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
@@ -454,7 +455,7 @@ func generateSentinelStatefulSet(rc *redisv1beta1.RedisCluster, labels map[strin
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
-										Name: util.GetSentinelReadinessCm(rc),
+										Name: utilold.GetSentinelReadinessCm(rc),
 									},
 								},
 							},
@@ -548,7 +549,7 @@ func createPodAntiAffinity(hard bool, labels map[string]string) *corev1.PodAntiA
 		return &corev1.PodAntiAffinity{
 			RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
 				{
-					TopologyKey: util.HostnameTopologyKey,
+					TopologyKey: utilold.HostnameTopologyKey,
 					LabelSelector: &metav1.LabelSelector{
 						MatchLabels: labels,
 					},
@@ -563,7 +564,7 @@ func createPodAntiAffinity(hard bool, labels map[string]string) *corev1.PodAntiA
 			{
 				Weight: 100,
 				PodAffinityTerm: corev1.PodAffinityTerm{
-					TopologyKey: util.HostnameTopologyKey,
+					TopologyKey: utilold.HostnameTopologyKey,
 					LabelSelector: &metav1.LabelSelector{
 						MatchLabels: labels,
 					},
@@ -605,7 +606,7 @@ func getRedisVolumeMounts(rc *redisv1beta1.RedisCluster) []corev1.VolumeMount {
 }
 
 func getRedisVolumes(rc *redisv1beta1.RedisCluster) []corev1.Volume {
-	shutdownConfigMapName := util.GetRedisShutdownConfigMapName(rc)
+	shutdownConfigMapName := utilold.GetRedisShutdownConfigMapName(rc)
 
 	executeMode := int32(0744)
 	volumes := []corev1.Volume{
@@ -691,7 +692,7 @@ func getSentinelCommand(rc *redisv1beta1.RedisCluster) []string {
 	}
 	return []string{
 		"redis-server",
-		fmt.Sprintf("/redis/%s", util.SentinelConfigFileName),
+		fmt.Sprintf("/redis/%s", utilold.SentinelConfigFileName),
 		"--sentinel",
 	}
 }
@@ -708,7 +709,7 @@ func getAffinity(affinity *corev1.Affinity, labels map[string]string) *corev1.Af
 				{
 					Weight: 100,
 					PodAffinityTerm: corev1.PodAffinityTerm{
-						TopologyKey: util.HostnameTopologyKey,
+						TopologyKey: utilold.HostnameTopologyKey,
 						LabelSelector: &metav1.LabelSelector{
 							MatchLabels: labels,
 						},
@@ -722,11 +723,11 @@ func getAffinity(affinity *corev1.Affinity, labels map[string]string) *corev1.Af
 // newHeadLessSvcForCR creates a new headless service for the given Cluster.
 func newHeadLessSvcForCR(cluster *redisv1beta1.RedisCluster, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.Service {
 	sentinelPort := corev1.ServicePort{Name: "sentinel", Port: 26379}
-	labels = util.MergeLabels(labels, generateSelectorLabels(util.SentinelRoleName, cluster.Name))
+	labels = util.MergeLabels(labels, generateSelectorLabels(utilold.SentinelRoleName, cluster.Name))
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels:          labels,
-			Name:            util.GetSentinelHeadlessSvc(cluster),
+			Name:            utilold.GetSentinelHeadlessSvc(cluster),
 			Namespace:       cluster.Namespace,
 			OwnerReferences: ownerRefs,
 		},

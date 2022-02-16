@@ -14,6 +14,7 @@ import (
 	"github.com/ucloud/redis-operator/pkg/client/k8s"
 	"github.com/ucloud/redis-operator/pkg/client/redis"
 	"github.com/ucloud/redis-operator/pkg/util"
+	utilold "github.com/ucloud/redis-operator/pkg/util-old"
 )
 
 // RedisClusterCheck defines the intercace able to check the correct status of a redis cluster
@@ -98,7 +99,7 @@ func (r *RedisClusterChecker) CheckRedisConfig(redisCluster *redisv1beta1.RedisC
 
 // CheckRedisNumber controls that the number of deployed redis is the same than the requested on the spec
 func (r *RedisClusterChecker) CheckRedisNumber(rc *redisv1beta1.RedisCluster) error {
-	ss, err := r.k8sService.GetStatefulSet(rc.Namespace, util.GetRedisName(rc))
+	ss, err := r.k8sService.GetStatefulSet(rc.Namespace, utilold.GetRedisName(rc))
 	if err != nil {
 		return err
 	}
@@ -113,7 +114,7 @@ func (r *RedisClusterChecker) CheckRedisNumber(rc *redisv1beta1.RedisCluster) er
 
 // CheckSentinelNumber controls that the number of deployed sentinel is the same than the requested on the spec
 func (r *RedisClusterChecker) CheckSentinelNumber(rc *redisv1beta1.RedisCluster) error {
-	d, err := r.k8sService.GetStatefulSet(rc.Namespace, util.GetSentinelName(rc))
+	d, err := r.k8sService.GetStatefulSet(rc.Namespace, utilold.GetSentinelName(rc))
 	if err != nil {
 		return err
 	}
@@ -125,7 +126,7 @@ func (r *RedisClusterChecker) CheckSentinelNumber(rc *redisv1beta1.RedisCluster)
 
 // CheckSentinelReadyReplicas controls that the number of deployed sentinel ready pod is the same than the requested on the spec
 func (r *RedisClusterChecker) CheckSentinelReadyReplicas(rc *redisv1beta1.RedisCluster) error {
-	d, err := r.k8sService.GetStatefulSet(rc.Namespace, util.GetSentinelName(rc))
+	d, err := r.k8sService.GetStatefulSet(rc.Namespace, utilold.GetSentinelName(rc))
 	if err != nil {
 		return err
 	}
@@ -232,7 +233,7 @@ func (r *RedisClusterChecker) GetNumberMasters(rc *redisv1beta1.RedisCluster, au
 // GetRedisesIPs returns the IPs of the Redis nodes
 func (r *RedisClusterChecker) GetRedisesIPs(rc *redisv1beta1.RedisCluster, auth *util.AuthConfig) ([]string, error) {
 	redises := []string{}
-	rps, err := r.k8sService.GetStatefulSetPods(rc.Namespace, util.GetRedisName(rc))
+	rps, err := r.k8sService.GetStatefulSetPods(rc.Namespace, utilold.GetRedisName(rc))
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +248,7 @@ func (r *RedisClusterChecker) GetRedisesIPs(rc *redisv1beta1.RedisCluster, auth 
 // GetSentinelsIPs returns the IPs of the Sentinel nodes
 func (r *RedisClusterChecker) GetSentinelsIPs(rc *redisv1beta1.RedisCluster) ([]string, error) {
 	sentinels := []string{}
-	rps, err := r.k8sService.GetStatefulSetPods(rc.Namespace, util.GetSentinelName(rc))
+	rps, err := r.k8sService.GetStatefulSetPods(rc.Namespace, utilold.GetSentinelName(rc))
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +263,7 @@ func (r *RedisClusterChecker) GetSentinelsIPs(rc *redisv1beta1.RedisCluster) ([]
 // GetMinimumRedisPodTime returns the minimum time a pod is alive
 func (r *RedisClusterChecker) GetMinimumRedisPodTime(rc *redisv1beta1.RedisCluster) (time.Duration, error) {
 	minTime := 100000 * time.Hour // More than ten years
-	rps, err := r.k8sService.GetStatefulSetPods(rc.Namespace, util.GetRedisName(rc))
+	rps, err := r.k8sService.GetStatefulSetPods(rc.Namespace, utilold.GetRedisName(rc))
 	if err != nil {
 		return minTime, err
 	}

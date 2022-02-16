@@ -1,14 +1,16 @@
 module github.com/ucloud/redis-operator
 
 require (
-	github.com/go-logr/logr v0.1.0
-	github.com/go-redis/redis v6.15.2+incompatible
-	github.com/onsi/ginkgo v1.8.0
-	github.com/onsi/gomega v1.5.0
+	github.com/go-logr/logr v1.2.2
+	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/onsi/ginkgo v1.16.5
+	github.com/onsi/gomega v1.18.1
 	github.com/operator-framework/operator-sdk v0.13.0
 	github.com/prometheus/client_golang v1.1.0
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.5.1
+	github.com/ucloud/redis-operator/pkg/client/redis v0.0.0-00010101000000-000000000000
+	github.com/ucloud/redis-operator/pkg/util v0.0.0-00010101000000-000000000000
 	k8s.io/api v0.0.0
 	k8s.io/apimachinery v0.0.0
 	k8s.io/client-go v12.0.0+incompatible
@@ -17,6 +19,8 @@ require (
 
 // Pinned to kubernetes-1.16.2
 replace (
+	github.com/ucloud/redis-operator/pkg/client/redis => ./pkg/client/redis
+	github.com/ucloud/redis-operator/pkg/util => ./pkg/util
 	k8s.io/api => k8s.io/api v0.0.0-20191016110408-35e52d86657a
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20191016113550-5357c4baaf65
 	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20191004115801-a2eda9f80ab8
